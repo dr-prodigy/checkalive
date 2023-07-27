@@ -1,0 +1,55 @@
+#!/bin/bash
+# set params here if you wish to run with no params
+DOMAIN=""
+TELEGRAM_TOKEN=""
+TELEGRAM_CHAT=""
+# error repeat timeout
+ERR_REPEAT_SECS=7200 # Repeat every 2 hrs
+
+if [ "$DOMAIN" != "" ] && [ "$TELEGRAM_TOKEN" != "" ] && [ "$TELEGRAM_CHAT" != "" ]; then
+  :
+elif [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" != "" ]; then
+  DOMAIN=$1
+  TELEGRAM_TOKEN=$2
+  TELEGRAM_CHAT=$3
+else
+  echo checkalive version 1.0
+  echo 
+  echo Usage: checkalive [protocol://domain] [TELEGRAM_TOKEN] [TELEGRAM_CHAT]
+  echo ex.: checkalive http://www.google.com 0123456789:AAAAAAAAA-BBBBBB-CCCCCCCCCCCCCCCCCC
+  echo Please refer to ./telegram.sh/README.md for details regarding TELEGRAM vars
+  exit 0
+fi
+
+CLEANED_DOMAIN=`echo $DOMAIN |sed -e "s/\\///g"`
+OK_TSTP_FILE="/tmp/checkalive_ok_$CLEANED_DOMAIN"
+ERR_TSTP_FILE="/tmp/checkalive_err_$CLEANED_DOMAIN"
+HTTP_STATUS=`curl -s -o /dev/null -w "%{http_code}" $DOMAIN`
+MESSAGE=""
+
+export TELEGRAM_TOKEN=$TELEGRAM_TOKEN
+export TELEGRAM_CHAT=$TELEGRAM_CHAT
+if [ "$HTTP_STATUS" = "200" ]; then
+  rm $ERR_TSTP_FILE 2>/dev/null
+  if [ ! -f "$OK_TSTP_FILE" ]; then
+    date +%s > $OK_TSTP_FILE
+    MESSAGE="$DOMAIN: monitoring OK"
+  fi
+else
+  rm $OK_TSTP_FILE 2>/dev/null
+  if [ ! -f "$ERR_TSTP_FILE" ]; then
+    date +%s > $ERR_TSTP_FILE
+    MESSAGE="$DOMAIN: monitoring DOWN!"
+  else
+    if [ $(( `date +%s`-`cat $ERR_TSTP_FILE` )) -gt $ERR_REPEAT_SECS ]; then
+      # Error timeout expired: repeat error message
+      date +%s > $ERR_TSTP_FILE
+      MESSAGE="$DOMAIN: repeated monitoring DOWN!"
+    fi
+  fi
+fi
+
+if [ "$MESSAGE" != "" ]; then
+  echo $MESSAGE
+  ./telegram.sh/telegram "$MESSAGE"
+fi
