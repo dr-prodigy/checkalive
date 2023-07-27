@@ -4,7 +4,8 @@ DOMAIN=""
 TELEGRAM_TOKEN=""
 TELEGRAM_CHAT=""
 
-TELEGRAM_SH_DIR="~/.telegram-sh"
+TELEGRAM_SH_DIR=~/.telegram-sh
+DEBUG_MSG=false
 
 # error repeat timeout
 ERR_REPEAT_SECS=7200 # Repeat every 2 hrs
@@ -58,6 +59,8 @@ else
 fi
 
 if [ "$MESSAGE" != "" ]; then
-  echo $MESSAGE
+  if [ "$DEBUG_MSG" = true ]; then
+    echo $MESSAGE
+  fi
   $TELEGRAM_SH_DIR/telegram "$MESSAGE"
 fi
