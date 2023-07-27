@@ -36,8 +36,6 @@ ERR_TSTP_FILE="/tmp/checkalive_err_$CLEANED_DOMAIN"
 HTTP_STATUS=`curl -s -o /dev/null -w "%{http_code}" $DOMAIN`
 MESSAGE=""
 
-export TELEGRAM_TOKEN=$TELEGRAM_TOKEN
-export TELEGRAM_CHAT=$TELEGRAM_CHAT
 if [ "$HTTP_STATUS" = "200" ]; then
   rm $ERR_TSTP_FILE 2>/dev/null
   if [ ! -f "$OK_TSTP_FILE" ]; then
@@ -62,5 +60,5 @@ if [ "$MESSAGE" != "" ]; then
   if [ "$DEBUG_MSG" = true ]; then
     echo $MESSAGE
   fi
-  $TELEGRAM_SH_DIR/telegram "$MESSAGE"
+  $TELEGRAM_SH_DIR/telegram "$MESSAGE" -t $TELEGRAM_TOKEN -c $TELEGRAM_CHAT
 fi
