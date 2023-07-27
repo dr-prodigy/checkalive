@@ -51,5 +51,5 @@ fi
 
 if [ "$MESSAGE" != "" ]; then
   echo $MESSAGE
-  ./telegram.sh/telegram "$MESSAGE"
+  ~/.telegram-sh/telegram "$MESSAGE"
 fi
