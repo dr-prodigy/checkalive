@@ -33,18 +33,18 @@ if [ "$HTTP_STATUS" = "200" ]; then
   rm $ERR_TSTP_FILE 2>/dev/null
   if [ ! -f "$OK_TSTP_FILE" ]; then
     date +%s > $OK_TSTP_FILE
-    MESSAGE="$DOMAIN: monitoring OK"
+    MESSAGE="$DOMAIN: monitoring OK (from $HOSTNAME)"
   fi
 else
   rm $OK_TSTP_FILE 2>/dev/null
   if [ ! -f "$ERR_TSTP_FILE" ]; then
     date +%s > $ERR_TSTP_FILE
-    MESSAGE="$DOMAIN: monitoring DOWN!"
+    MESSAGE="$DOMAIN: monitoring DOWN! (from $HOSTNAME)"
   else
     if [ $(( `date +%s`-`cat $ERR_TSTP_FILE` )) -gt $ERR_REPEAT_SECS ]; then
       # Error timeout expired: repeat error message
       date +%s > $ERR_TSTP_FILE
-      MESSAGE="$DOMAIN: repeated monitoring DOWN!"
+      MESSAGE="$DOMAIN: repeated monitoring DOWN! (from $HOSTNAME)"
     fi
   fi
 fi
