@@ -25,7 +25,7 @@ else
   echo checkalive version 1.0
   echo 
   echo Usage: checkalive [protocol://domain] [TELEGRAM_TOKEN] [TELEGRAM_CHAT]
-  echo ex.: checkalive http://www.google.com 0123456789:AAAAAAAAA-BBBBBB-CCCCCCCCCCCCCCCCCC
+  echo ex.: checkalive http://www.google.com 0123456789:AAAAAAAAA-BBBBBB-CCCCCCCCCCCCCCCCCC 123456789
   echo Please refer to ~/.telegram-sh/README.md for details regarding TELEGRAM vars
   exit 0
 fi
