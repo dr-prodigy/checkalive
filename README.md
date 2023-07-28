@@ -15,10 +15,10 @@ Please refer to the relevant documentation on how to set up your bot, token and 
 ```$ ./checkalive [URL to be checked] [Telegram token] [Telegram chat ID]```
 
 The command requires 3 parameters:
-- Domain/URL to be checked
-- Telegram token
-- Telegram chat ID
-which can be provided as commandline params, or as variables in the script itself (in that case, command will run without any params).
+- CHECK_URL: Domain/URL (including protocol) to be checked
+- TELEGRAM_TOKEN: Telegram token
+- TELEGRAM_CHAT: Telegram chat ID
+which can be provided as commandline params, or as environment variables using ``export ...``, or even set in the script itself (in the last 2 cases, command will run without any params).
 
 Example of crontab scheduling:
 ```

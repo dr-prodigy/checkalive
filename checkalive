@@ -1,8 +1,8 @@
 #!/bin/bash
 # set vars here if you wish to run with no params
-DOMAIN=""
-TELEGRAM_TOKEN=""
-TELEGRAM_CHAT=""
+# CHECK_URL=""
+# TELEGRAM_TOKEN=""
+# TELEGRAM_CHAT=""
 
 TELEGRAM_SH_DIR=~/.telegram-sh
 DEBUG_MSG=false
@@ -15,43 +15,43 @@ if [ ! -f "$TELEGRAM_SH_DIR/telegram" ]; then
   git clone https://github.com/fabianonline/telegram.sh.git $TELEGRAM_SH_DIR
 fi
 
-if [ "$DOMAIN" != "" ] && [ "$TELEGRAM_TOKEN" != "" ] && [ "$TELEGRAM_CHAT" != "" ]; then
+if [ "$CHECK_URL" != "" ] && [ "$TELEGRAM_TOKEN" != "" ] && [ "$TELEGRAM_CHAT" != "" ]; then
   :
 elif [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" != "" ]; then
-  DOMAIN=$1
+  CHECK_URL=$1
   TELEGRAM_TOKEN=$2
   TELEGRAM_CHAT=$3
 else
   echo checkalive version 1.0
   echo 
-  echo Usage: checkalive [protocol://domain] [TELEGRAM_TOKEN] [TELEGRAM_CHAT]
+  echo Usage: checkalive [CHECK_URL] [TELEGRAM_TOKEN] [TELEGRAM_CHAT]
   echo ex.: checkalive http://www.google.com 0123456789:AAAAAAAAA-BBBBBB-CCCCCCCCCCCCCCCCCC 123456789
   echo Please refer to $TELEGRAM_SH_DIR/README.md for details regarding TELEGRAM vars
   exit 0
 fi
 
-CLEANED_DOMAIN=`echo $DOMAIN |sed -e "s/\\///g"`
-OK_TSTP_FILE="/tmp/checkalive_ok_$CLEANED_DOMAIN"
-ERR_TSTP_FILE="/tmp/checkalive_err_$CLEANED_DOMAIN"
-HTTP_STATUS=`curl -s -o /dev/null -w "%{http_code}" $DOMAIN`
+SANITIZED_URL=`echo $CHECK_URL |sed -e "s/\\///g"`
+OK_TSTP_FILE="/tmp/checkalive_ok_$SANITIZED_URL"
+ERR_TSTP_FILE="/tmp/checkalive_err_$SANITIZED_URL"
+HTTP_STATUS=`curl -s -o /dev/null -w "%{http_code}" $CHECK_URL`
 MESSAGE=""
 
 if [ "$HTTP_STATUS" = "200" ]; then
   rm $ERR_TSTP_FILE 2>/dev/null
   if [ ! -f "$OK_TSTP_FILE" ]; then
     date +%s > $OK_TSTP_FILE
-    MESSAGE="$DOMAIN: monitoring OK (from $HOSTNAME)"
+    MESSAGE="$CHECK_URL: monitoring OK (from $HOSTNAME)"
   fi
 else
   rm $OK_TSTP_FILE 2>/dev/null
   if [ ! -f "$ERR_TSTP_FILE" ]; then
     date +%s > $ERR_TSTP_FILE
-    MESSAGE="$DOMAIN: monitoring DOWN! (from $HOSTNAME)"
+    MESSAGE="$CHECK_URL: monitoring DOWN! (from $HOSTNAME)"
   else
     if [ $(( `date +%s`-`cat $ERR_TSTP_FILE` )) -gt $ERR_REPEAT_SECS ]; then
       # Error timeout expired: repeat error message
       date +%s > $ERR_TSTP_FILE
-      MESSAGE="$DOMAIN: repeated monitoring DOWN! (from $HOSTNAME)"
+      MESSAGE="$CHECK_URL: repeated monitoring DOWN! (from $HOSTNAME)"
     fi
   fi
 fi
