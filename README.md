@@ -7,7 +7,7 @@ It is meant to be scheduled at recurring times (eg: every 5 minutes) using cron 
 
 Alerts will be sent on a Telegram chat every time the status changes (OK -> Error -> OK ..) or, when in error, repeatedly, according to ``ERR_REPEAT_SECS`` variable, which can be customized into the script (default = every 4 hours).
 
-Alerts are delivered using *Telegram.sh* (https://github.com/fabianonline/telegram.sh), which is automatically installed upon first run (installation directory can also be customized via ).
+Alerts are delivered using *Telegram.sh* (https://github.com/fabianonline/telegram.sh), which is automatically installed upon first run (installation directory can also be customized via ``TELEGRAM_SH_DIR`` variable).
 
 Please refer to the relevant documentation on how to set up your bot, token and chat ID.
 
@@ -15,9 +15,9 @@ Please refer to the relevant documentation on how to set up your bot, token and 
 ```$ ./checkalive [URL to be checked] [Telegram token] [Telegram chat ID]```
 
 The command requires 3 parameters:
-- CHECK_URL: Domain/URL (including protocol) to be checked
-- TELEGRAM_TOKEN: Telegram token
-- TELEGRAM_CHAT: Telegram chat ID
+- ``CHECK_URL``: Domain/URL (including protocol) to be checked
+- ``TELEGRAM_TOKEN``: Telegram token
+- ``TELEGRAM_CHAT``: Telegram chat ID
 
 which can be provided as commandline params, or as environment variables (``export [VAR]=[value] ...``) or even set in the script itself
 
