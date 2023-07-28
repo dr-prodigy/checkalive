@@ -1,14 +1,13 @@
 #!/bin/bash
-# set vars here if you wish to run with no params
+# export these env vars or set them here if you wish to run command with no params
 # CHECK_URL=""
 # TELEGRAM_TOKEN=""
 # TELEGRAM_CHAT=""
 
-TELEGRAM_SH_DIR=~/.telegram-sh
-DEBUG_MSG=false
-
-# error repeat timeout
-ERR_REPEAT_SECS=7200 # Repeat every 2 hrs
+# Configuration
+TELEGRAM_SH_DIR=~/.telegram-sh # Telegram.sh installation dir
+DEBUG_MSG=false                # echo alerts to STDOUT
+ERR_REPEAT_SECS=14400          # repeat error alert every XXXX secs (14400 = 4 hrs default)
 
 if [ ! -f "$TELEGRAM_SH_DIR/telegram" ]; then
   echo "telegram.sh missing. Running installation"
