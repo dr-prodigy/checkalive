@@ -14,13 +14,15 @@ if [ ! -f "$TELEGRAM_SH_DIR/telegram" ]; then
   git clone https://github.com/fabianonline/telegram.sh.git $TELEGRAM_SH_DIR
 fi
 
-if [ "$CHECK_URL" != "" ] && [ "$TELEGRAM_TOKEN" != "" ] && [ "$TELEGRAM_CHAT" != "" ]; then
-  :
-elif [ "$1" != "" ] && [ "$2" != "" ] && [ "$3" != "" ]; then
+if [ "$1" != "" ]; then
   CHECK_URL=$1
+fi
+if [ "$2" != "" ] && [ "$3" != "" ]; then
   TELEGRAM_TOKEN=$2
   TELEGRAM_CHAT=$3
-else
+fi
+
+if [ "$CHECK_URL" = "" ] || [ "$TELEGRAM_TOKEN" = "" ] || [ "$TELEGRAM_CHAT" = "" ]; then
   echo checkalive version 1.0
   echo 
   echo Usage: checkalive [CHECK_URL] [TELEGRAM_TOKEN] [TELEGRAM_CHAT]
