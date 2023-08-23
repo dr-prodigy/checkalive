@@ -61,5 +61,5 @@ if [ "$MESSAGE" != "" ]; then
   if [ "$DEBUG_MSG" = true ]; then
     echo $MESSAGE
   fi
-  $TELEGRAM_SH_DIR/telegram "$MESSAGE" -t $TELEGRAM_TOKEN -c $TELEGRAM_CHAT
+  $TELEGRAM_SH_DIR/telegram -t $TELEGRAM_TOKEN -c $TELEGRAM_CHAT "$MESSAGE" 
 fi
