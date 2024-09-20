@@ -47,6 +47,7 @@ fi
 CHECK_URL_NOCACHE+="x=$RANDOM"
 
 HTTP_STATUS=`curl -m $TIMEOUT_SECS -s -o /dev/null -w "%{http_code}" -H "Cache-Control: no-cache, no-store, must-revalidate" -H "Pragma: no-cache" -H "Expires: 0" $CHECK_URL_NOCACHE`
+ERROR_CODE=$?
 
 if [ "$HTTP_STATUS" = "200" ]; then
   # Send OK message in case of a previous error, or if REPORT_OK_AT_START = true
@@ -61,12 +62,12 @@ else
   rm $OK_TSTP_FILE 2>/dev/null
   if [ ! -f "$ERR_TSTP_FILE" ]; then
     date +%s > $ERR_TSTP_FILE
-    MESSAGE="$CHECK_URL: monitoring DOWN! (from $HOSTNAME)"
+    MESSAGE="$CHECK_URL: monitoring DOWN! (from $HOSTNAME) - Errcode ($ERROR_CODE)"
   else
     if [ $(( `date +%s`-`cat $ERR_TSTP_FILE` )) -gt $ERR_REPEAT_SECS ]; then
       # Error timeout expired: repeat error message
       date +%s > $ERR_TSTP_FILE
-      MESSAGE="$CHECK_URL: repeated monitoring DOWN! (from $HOSTNAME)"
+      MESSAGE="$CHECK_URL: repeated monitoring DOWN! (from $HOSTNAME) - Errcode ($ERROR_CODE)"
     fi
   fi
 fi
