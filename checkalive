@@ -37,7 +37,7 @@ if [ "$CHECK_URL" = "" ] || [ "$TELEGRAM_TOKEN" = "" ] || [ "$TELEGRAM_CHAT" = "
 fi
 
 if [ "$KNOWN_GOOD_URL" = "" ]; then
-  KNOWN_GOOD_URL=KNOWN_GOOD_URL_DEFAULT
+  KNOWN_GOOD_URL=$KNOWN_GOOD_URL_DEFAULT
 fi
 
 SANITIZED_URL=`echo $CHECK_URL |sed -e "s/\\///g"`
