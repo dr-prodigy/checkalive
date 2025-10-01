@@ -3,6 +3,8 @@
 # CHECK_URL=""
 # TELEGRAM_TOKEN=""
 # TELEGRAM_CHAT=""
+# export this var to override known good URL
+# KNOWN_GOOD_URL=""
 
 # Configuration
 TELEGRAM_SH_DIR=~/.telegram-sh # Telegram.sh installation dir
@@ -10,6 +12,7 @@ DEBUG_MSG=false                # echo alerts to STDOUT
 ERR_REPEAT_SECS=14400          # repeat error alert every XXXX secs (14400 = 4 hrs default)
 REPORT_OK_AT_START=false       # if true, OK will be sent at first start, or after every reboot
 TIMEOUT_SECS=10                # curl max time (timeout before fail)
+KNOWN_GOOD_URL_DEFAULT=https://www.google.com
 
 if [ ! -f "$TELEGRAM_SH_DIR/telegram" ]; then
   echo "telegram.sh missing. Running installation"
@@ -33,6 +36,10 @@ if [ "$CHECK_URL" = "" ] || [ "$TELEGRAM_TOKEN" = "" ] || [ "$TELEGRAM_CHAT" = "
   exit 0
 fi
 
+if [ "$KNOWN_GOOD_URL" = "" ]; then
+  KNOWN_GOOD_URL=KNOWN_GOOD_URL_DEFAULT
+fi
+
 SANITIZED_URL=`echo $CHECK_URL |sed -e "s/\\///g"`
 OK_TSTP_FILE="/tmp/checkalive_ok_$SANITIZED_URL"
 ERR_TSTP_FILE="/tmp/checkalive_err_$SANITIZED_URL"
@@ -46,35 +53,39 @@ else
 fi
 CHECK_URL_NOCACHE+="x=$RANDOM"
 
-HTTP_STATUS=`curl --no-keepalive -m $TIMEOUT_SECS -s -o /dev/null -w "%{http_code}" -H "Cache-Control: no-cache, no-store, must-revalidate" -H "Pragma: no-cache" -H "Expires: 0" $CHECK_URL_NOCACHE`
-ERROR_CODE=$?
-
+# Test local connectivity curl-ing the known-good URL. If not available, skip any further monitoring check
+HTTP_STATUS=`curl --no-keepalive -m $TIMEOUT_SECS -s -o /dev/null -w "%{http_code}" -H "Cache-Control: no-cache, no-store, must-revalidate" -H "Pragma: no-cache" -H "Expires: 0" $KNOWN_GOOD_URL`
 if [ "$HTTP_STATUS" = "200" ]; then
-  # Send OK message in case of a previous error, or if REPORT_OK_AT_START = true
-  if [ -f "$ERR_TSTP_FILE" ] || [ "$REPORT_OK_AT_START" = true ]; then
-    rm $ERR_TSTP_FILE 2>/dev/null
-    if [ ! -f "$OK_TSTP_FILE" ]; then
-      date +%s > $OK_TSTP_FILE
-      MESSAGE="$CHECK_URL: monitoring OK (from $HOSTNAME)"
-    fi
-  fi
-else
-  rm $OK_TSTP_FILE 2>/dev/null
-  if [ ! -f "$ERR_TSTP_FILE" ]; then
-    date +%s > $ERR_TSTP_FILE
-    MESSAGE="$CHECK_URL: monitoring DOWN! (from $HOSTNAME) - Errcode ($ERROR_CODE)"
-  else
-    if [ $(( `date +%s`-`cat $ERR_TSTP_FILE` )) -gt $ERR_REPEAT_SECS ]; then
-      # Error timeout expired: repeat error message
-      date +%s > $ERR_TSTP_FILE
-      MESSAGE="$CHECK_URL: repeated monitoring DOWN! (from $HOSTNAME) - Errcode ($ERROR_CODE)"
-    fi
-  fi
-fi
+  HTTP_STATUS=`curl --no-keepalive -m $TIMEOUT_SECS -s -o /dev/null -w "%{http_code}" -H "Cache-Control: no-cache, no-store, must-revalidate" -H "Pragma: no-cache" -H "Expires: 0" $CHECK_URL_NOCACHE`
+  ERROR_CODE=$?
 
-if [ "$MESSAGE" != "" ]; then
-  if [ "$DEBUG_MSG" = true ]; then
-    echo $MESSAGE
+  if [ "$HTTP_STATUS" = "200" ]; then
+    # Send OK message in case of a previous error, or if REPORT_OK_AT_START = true
+    if [ -f "$ERR_TSTP_FILE" ] || [ "$REPORT_OK_AT_START" = true ]; then
+      rm $ERR_TSTP_FILE 2>/dev/null
+      if [ ! -f "$OK_TSTP_FILE" ]; then
+        date +%s > $OK_TSTP_FILE
+        MESSAGE="$CHECK_URL: monitoring OK (from $HOSTNAME)"
+      fi
+    fi
+  else
+    rm $OK_TSTP_FILE 2>/dev/null
+    if [ ! -f "$ERR_TSTP_FILE" ]; then
+      date +%s > $ERR_TSTP_FILE
+      MESSAGE="$CHECK_URL: monitoring DOWN! (from $HOSTNAME) - Errcode ($ERROR_CODE)"
+    else
+      if [ $(( `date +%s`-`cat $ERR_TSTP_FILE` )) -gt $ERR_REPEAT_SECS ]; then
+        # Error timeout expired: repeat error message
+        date +%s > $ERR_TSTP_FILE
+        MESSAGE="$CHECK_URL: repeated monitoring DOWN! (from $HOSTNAME) - Errcode ($ERROR_CODE)"
+      fi
+    fi
   fi
-  $TELEGRAM_SH_DIR/telegram -t $TELEGRAM_TOKEN -c $TELEGRAM_CHAT "$MESSAGE" 
+
+  if [ "$MESSAGE" != "" ]; then
+    if [ "$DEBUG_MSG" = true ]; then
+      echo $MESSAGE
+    fi
+    $TELEGRAM_SH_DIR/telegram -t $TELEGRAM_TOKEN -c $TELEGRAM_CHAT "$MESSAGE" 
+  fi
 fi
